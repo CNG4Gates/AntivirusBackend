@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "A8umRM4QCyPjggjgfrbtmJozibjlQZgolFfiDz0fz6s=",
+  "Source": "Antivirus",
+  "BasePath": "_content/Antivirus",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
