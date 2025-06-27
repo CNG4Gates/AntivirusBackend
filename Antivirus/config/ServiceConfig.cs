@@ -26,9 +26,12 @@ namespace Antivirus.config
             services.AddScoped<IUserOpportunityService, UserOpportunityService>();
             services.AddScoped<IServiceService, ServiceService>();
             services.AddScoped<IBenefitService, BenefitService>();
-            // Configuración de la base de datos
+            // Configuración de la base de datos para MySQL (Pomelo)
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+                options.UseMySql(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    ServerVersion.AutoDetect(configuration.GetConnectionString("DefaultConnection"))
+                ));
         }
     }
 }

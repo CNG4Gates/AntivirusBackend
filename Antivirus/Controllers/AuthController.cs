@@ -39,13 +39,6 @@ namespace Antivirus.Controllers
                 return BadRequest(new { message = "El correo electrónico ya está registrado." });
             }
 
-            // Verificar si ya existe un administrador registrado
-            var existingAdmin = _context.UserRoles.FirstOrDefault(ur => ur.RoleId == 2);
-            if (existingAdmin != null)
-            {
-                return BadRequest(new { message = "Ya existe un administrador registrado." });
-            }
-
             // Mapear el DTO a la entidad User (solo email y password)
             var user = new User
             {
@@ -131,6 +124,37 @@ namespace Antivirus.Controllers
             Response.Cookies.Delete("token");
 
             return Ok(new { message = "Sesión cerrada exitosamente." });
+        }
+
+        // GET: api/auth/admins
+        [HttpGet("admins")]
+        public IActionResult GetAllAdmins()
+        {
+            var adminRole = _context.Roles.FirstOrDefault(r => r.Name == "admin" || r.Id == 2);
+            if (adminRole == null) return NotFound(new { message = "Rol de administrador no encontrado." });
+
+            var admins = (from ur in _context.UserRoles
+                        join u in _context.Users on ur.UserId equals u.Id
+                        where ur.RoleId == adminRole.Id
+                        select new { u.Id, u.Email, u.Name, u.LastName, u.DateBirth }).ToList();
+
+            return Ok(admins);
+        }
+
+        [HttpGet("admins/{id}")]
+        public IActionResult GetAdminById(long id)
+        {
+            var adminRole = _context.Roles.FirstOrDefault(r => r.Name == "admin" || r.Id == 2);
+            if (adminRole == null) return NotFound(new { message = "Rol de administrador no encontrado." });
+
+            var admin = (from ur in _context.UserRoles
+                        join u in _context.Users on ur.UserId equals u.Id
+                        where ur.RoleId == adminRole.Id && ur.UserId == id
+                        select new { u.Id, u.Email, u.Name, u.LastName, u.DateBirth }).FirstOrDefault();
+
+            if (admin == null) return NotFound(new { message = "Administrador no encontrado." });
+
+            return Ok(admin);
         }
     }
 }
