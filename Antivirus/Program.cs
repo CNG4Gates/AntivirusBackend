@@ -43,15 +43,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configuración de CORS
+// ⚡️ Configuración de CORS muy abierta para pruebas (luego puedes restringir)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Reemplaza con la URL de tu frontend
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); // Permite el uso de credenciales (cookies, etc.)
+        policy
+            .SetIsOriginAllowed(origin => true) // ⚡️ Permite cualquier origen (SOLO DESARROLLO)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        // NO pongas AllowCredentials a menos que uses cookies/sesión
     });
 });
 
@@ -75,7 +76,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Usa la política de CORS
+// Usa la política de CORS antes de autenticación/autorización
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();

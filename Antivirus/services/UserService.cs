@@ -2,7 +2,7 @@ using Antivirus.DTOs;
 using Antivirus.Models;
 using Microsoft.EntityFrameworkCore;
 using Antivirus.Data;
-using Antivirus.config; // Si usas PasswordHasher
+using Antivirus.config;
 
 namespace Antivirus.Services
 {
@@ -42,24 +42,25 @@ namespace Antivirus.Services
             };
         }
 
-        public async Task<UsersReadDTO> CreateUserAsync(UsersCreateDTO userDto)
+        public async Task<UsersReadDTO> CreateUserAsync(UsersCreateDTO userDto, bool isAdmin = false)
         {
             var user = new User
             {
                 Name = userDto.Name,
                 LastName = userDto.LastName,
                 Email = userDto.Email,
-                Password = PasswordHasher.HashPassword(userDto.Password), // Hashea la contraseña
+                Password = PasswordHasher.HashPassword(userDto.Password),
                 DateBirth = userDto.DateBirth
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Asignar rol "Usuario" (Id = 1) por defecto
+            // Rol: Usuario (Id=1) o Admin (Id=2)
+            var roleId = isAdmin ? 2 : 1;
             var userRole = new UserRole
             {
                 UserId = user.Id,
-                RoleId = 1 // Usuario
+                RoleId = roleId
             };
             _context.UserRoles.Add(userRole);
             await _context.SaveChangesAsync();
@@ -79,11 +80,11 @@ namespace Antivirus.Services
             var user = await _context.Users.FindAsync(id);
             if (user == null) return null;
 
-            user.Name = userDto.Name;
-            user.LastName = userDto.LastName;
-            user.Email = userDto.Email;
-            user.Password = PasswordHasher.HashPassword(userDto.Password); // Hashea si es necesario
-            user.DateBirth = userDto.DateBirth;
+            user.Name = userDto.Name ?? user.Name;
+            user.LastName = userDto.LastName ?? user.LastName;
+            user.DateBirth = userDto.DateBirth ?? user.DateBirth;
+            if (!string.IsNullOrEmpty(userDto.Password))
+                user.Password = PasswordHasher.HashPassword(userDto.Password);
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
@@ -105,6 +106,14 @@ namespace Antivirus.Services
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<bool> IsAdminAsync(long userId)
+        {
+            return await _context.UserRoles.AnyAsync(ur =>
+                ur.UserId == userId &&
+                _context.Roles.Any(r => r.Id == ur.RoleId && r.Name.ToLower() == "admin")
+            );
         }
     }
 }

@@ -120,8 +120,6 @@ namespace Antivirus.Migrations
 
                     b.HasIndex("InstitutionId");
 
-                    b.HasIndex("OpportunityId");
-
                     b.ToTable("InstituteOpportunities");
                 });
 
@@ -177,46 +175,21 @@ namespace Antivirus.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("AdicionalDates")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Applications")
-                        .HasColumnType("longtext");
-
-                    b.Property<long?>("CategoriesId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ContactChannels")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
-
-                    b.Property<string>("Guide")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("Observations")
-                        .HasColumnType("longtext");
-
-                    b.Property<long?>("OpportunityTypeId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Requirements")
-                        .HasColumnType("longtext");
-
                     b.Property<bool>("Status")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<long?>("StatusReviewId")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -378,8 +351,6 @@ namespace Antivirus.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OpportunityId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("UserOpportunities");
@@ -424,10 +395,6 @@ namespace Antivirus.Migrations
                     b.HasOne("Antivirus.Models.Institution", null)
                         .WithMany("InstituteOpportunities")
                         .HasForeignKey("InstitutionId");
-
-                    b.HasOne("Antivirus.Models.Opportunity", null)
-                        .WithMany("InstituteOpportunities")
-                        .HasForeignKey("OpportunityId");
                 });
 
             modelBuilder.Entity("Antivirus.Models.Institution", b =>
@@ -450,10 +417,6 @@ namespace Antivirus.Migrations
 
             modelBuilder.Entity("Antivirus.Models.UserOpportunity", b =>
                 {
-                    b.HasOne("Antivirus.Models.Opportunity", null)
-                        .WithMany("UserOpportunities")
-                        .HasForeignKey("OpportunityId");
-
                     b.HasOne("Antivirus.Models.User", null)
                         .WithMany("UserOpportunities")
                         .HasForeignKey("UserId");
@@ -486,13 +449,6 @@ namespace Antivirus.Migrations
                     b.Navigation("InstituteBootcamps");
 
                     b.Navigation("InstituteOpportunities");
-                });
-
-            modelBuilder.Entity("Antivirus.Models.Opportunity", b =>
-                {
-                    b.Navigation("InstituteOpportunities");
-
-                    b.Navigation("UserOpportunities");
                 });
 
             modelBuilder.Entity("Antivirus.Models.Role", b =>

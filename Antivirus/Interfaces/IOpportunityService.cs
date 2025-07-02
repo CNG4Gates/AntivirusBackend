@@ -1,6 +1,6 @@
-using Antivirus.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Antivirus.DTOs;
 
 namespace Antivirus.Services
 {

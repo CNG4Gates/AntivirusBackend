@@ -1,78 +1,100 @@
-using AutoMapper;
 using Antivirus.DTOs;
 using Antivirus.Models;
+using Antivirus.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Antivirus.Data;
 
 namespace Antivirus.Services
 {
     public class OpportunityService : IOpportunityService
     {
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
 
-        public OpportunityService(AppDbContext context, IMapper mapper)
+        public OpportunityService(AppDbContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<IEnumerable<OpportunitiesReadDTO>> GetAllAsync()
         {
-            var entities = await _context.Opportunities.ToListAsync();
-            return _mapper.Map<IEnumerable<OpportunitiesReadDTO>>(entities);
+            return await _context.Opportunities
+                .Select(o => new OpportunitiesReadDTO
+                {
+                    Id = o.Id,
+                    Name = o.Name,
+                    Description = o.Description,
+                    ImageUrl = o.ImageUrl,
+                    Status = o.Status
+                })
+                .ToListAsync();
         }
 
         public async Task<OpportunitiesReadDTO?> GetByIdAsync(long id)
         {
-            var entity = await _context.Opportunities.FindAsync(id);
-            return entity == null ? null : _mapper.Map<OpportunitiesReadDTO>(entity);
+            var opportunity = await _context.Opportunities.FindAsync(id);
+            if (opportunity == null) return null;
+
+            return new OpportunitiesReadDTO
+            {
+                Id = opportunity.Id,
+                Name = opportunity.Name,
+                Description = opportunity.Description,
+                ImageUrl = opportunity.ImageUrl,
+                Status = opportunity.Status
+            };
         }
 
         public async Task<OpportunitiesReadDTO> CreateAsync(OpportunitiesCreateDTO dto)
         {
-            var entity = _mapper.Map<Opportunity>(dto);
-            _context.Opportunities.Add(entity);
+            var opportunity = new Opportunity
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                ImageUrl = dto.ImageUrl,
+                Status = true // O el valor por defecto que prefieras
+            };
+
+            _context.Opportunities.Add(opportunity);
             await _context.SaveChangesAsync();
-            return _mapper.Map<OpportunitiesReadDTO>(entity);
+
+            return new OpportunitiesReadDTO
+            {
+                Id = opportunity.Id,
+                Name = opportunity.Name,
+                Description = opportunity.Description,
+                ImageUrl = opportunity.ImageUrl,
+                Status = opportunity.Status
+            };
         }
 
         public async Task<OpportunitiesReadDTO?> UpdateAsync(long id, OpportunitiesCreateDTO dto)
         {
-            var entity = await _context.Opportunities.FindAsync(id);
-            if (entity == null)
-            {
-                return null;
-            }
+            var opportunity = await _context.Opportunities.FindAsync(id);
+            if (opportunity == null) return null;
 
-            entity.Name = dto.Name;
-            entity.Description = dto.Description;
-            entity.AdicionalDates = dto.AdicionalDates;
-            entity.Applications = dto.Applications;
-            entity.ContactChannels = dto.ContactChannels;
-            entity.Guide = dto.Guide;
-            entity.Observations = dto.Observations;
-            entity.Requirements = dto.Requirements;
-            entity.CategoriesId = dto.CategoriesId;
-            entity.StatusReviewId = dto.StatusReviewId;
-            entity.OpportunityTypeId = dto.OpportunityTypeId;
-            entity.ImageUrl = dto.ImageUrl;
+            opportunity.Name = dto.Name;
+            opportunity.Description = dto.Description;
+            opportunity.ImageUrl = dto.ImageUrl;
 
-            _context.Opportunities.Update(entity);
             await _context.SaveChangesAsync();
-            return _mapper.Map<OpportunitiesReadDTO>(entity);
+
+            return new OpportunitiesReadDTO
+            {
+                Id = opportunity.Id,
+                Name = opportunity.Name,
+                Description = opportunity.Description,
+                ImageUrl = opportunity.ImageUrl,
+                Status = opportunity.Status
+            };
         }
 
         public async Task<bool> DeleteAsync(long id)
         {
-            var entity = await _context.Opportunities.FindAsync(id);
-            if (entity == null)
-            {
-                return false;
-            }
-            _context.Opportunities.Remove(entity);
+            var opportunity = await _context.Opportunities.FindAsync(id);
+            if (opportunity == null) return false;
+
+            _context.Opportunities.Remove(opportunity);
             await _context.SaveChangesAsync();
             return true;
         }

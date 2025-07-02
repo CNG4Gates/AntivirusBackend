@@ -13,36 +13,23 @@ namespace Antivirus.DTOs
 
     public class UsersCreateDTO
     {
-        [Required]
+        
+        [Required(ErrorMessage = "El correo es obligatorio")]
+        [EmailAddress]
+        [StringLength(255)]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [StringLength(255)]
+        public string Password { get; set; }
+
+        [StringLength(255)]
+        public string? Name { get; set; }
+
+        [StringLength(255)]
+        public string? LastName { get; set; }
+
         [StringLength(255)]
         public string? DateBirth { get; set; }
-
-        [Required]
-        [StringLength(255)]
-        public string Email { get; set; }
-
-        [Required]
-        [StringLength(255)]
-        public string LastName { get; set; }
-
-        [Required]
-        [StringLength(255)]
-        public string Name { get; set; }
-
-        [Required]
-        [StringLength(255)]
-        public string Password { get; set; }
-    }
-
- 
-    public class RegisterDTO
-    {
-        [Required]
-        [StringLength(255)]
-        public string Email { get; set; }
-
-        [Required]
-        [StringLength(255)]
-        public string Password { get; set; }
     }
 }
