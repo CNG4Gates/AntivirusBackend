@@ -7,19 +7,18 @@ using Antivirus.Models;
 using Microsoft.EntityFrameworkCore;
 using Antivirus.config;
 using Microsoft.Extensions.Configuration;
-using System.Linq;
 
 namespace Antivirus.Controllers
 {
-    [Route("api/users")]
+    [Route("api/admins")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class AdminsController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
 
-        public UsersController(IUserService userService, AppDbContext context, IConfiguration config)
+        public AdminsController(IUserService userService, AppDbContext context, IConfiguration config)
         {
             _userService = userService;
             _context = context;
@@ -27,32 +26,32 @@ namespace Antivirus.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UsersCreateDTO userDto)
+        public async Task<IActionResult> RegisterAdmin([FromBody] UsersCreateDTO userDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             if (_context.Users.Any(u => u.Email == userDto.Email))
                 return BadRequest(new { message = "El correo electrónico ya está registrado." });
 
-            var user = await _userService.CreateUserAsync(userDto, false);
+            var user = await _userService.CreateUserAsync(userDto, true);
 
-            // Asignar rol Usuario automáticamente al crear el usuario
-            var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.ToLower() == "usuario" || r.Id == 1);
-            if (userRole == null)
-                return BadRequest(new { message = "No se encontró el rol Usuario en la base de datos." });
+            // Asignar rol Admin automáticamente
+            var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.ToLower() == "admin" || r.Id == 2);
+            if (adminRole == null)
+                return BadRequest(new { message = "No se encontró el rol Admin en la base de datos." });
 
-            var exists = await _context.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == userRole.Id);
+            var exists = await _context.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == adminRole.Id);
             if (!exists)
             {
                 _context.UserRoles.Add(new UserRole
                 {
                     UserId = user.Id,
-                    RoleId = userRole.Id
+                    RoleId = adminRole.Id
                 });
                 await _context.SaveChangesAsync();
             }
 
-            return Ok(new { message = "Usuario registrado exitosamente.", user });
+            return Ok(new { message = "Administrador registrado exitosamente.", user });
         }
 
         [HttpPost("login")]
@@ -71,8 +70,8 @@ namespace Antivirus.Controllers
                 .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
                 .FirstOrDefault();
 
-            if (userRole == null || userRole.ToLower() != "usuario")
-                return Unauthorized(new { message = "El usuario no tiene rol válido." });
+            if (userRole == null || userRole.ToLower() != "admin")
+                return Unauthorized(new { message = "El usuario no tiene rol de admin." });
 
             var token = new AuthService(_config).GenerateJwtToken(user);
 
@@ -110,49 +109,73 @@ namespace Antivirus.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public IActionResult GetAllAdmins()
         {
-            var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+            var adminRole = _context.Roles.FirstOrDefault(r => r.Name.ToLower() == "admin" || r.Id == 2);
+            if (adminRole == null) return NotFound(new { message = "Rol de administrador no encontrado." });
+
+            var admins = (from ur in _context.UserRoles
+                          join u in _context.Users on ur.UserId equals u.Id
+                          where ur.RoleId == adminRole.Id
+                          select new UsersReadDTO
+                          {
+                              Id = u.Id,
+                              Email = u.Email,
+                              Name = u.Name,
+                              LastName = u.LastName,
+                              DateBirth = u.DateBirth,
+                              ImageUrl = u.ImageUrl
+                          }).ToList();
+
+            return Ok(admins);
         }
 
         [Authorize]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(long id)
+        public IActionResult GetAdminById(long id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null) return NotFound(new { message = "Usuario no encontrado." });
-            return Ok(user);
+            var adminRole = _context.Roles.FirstOrDefault(r => r.Name.ToLower() == "admin" || r.Id == 2);
+            if (adminRole == null) return NotFound(new { message = "Rol de administrador no encontrado." });
+
+            var admin = (from ur in _context.UserRoles
+                         join u in _context.Users on ur.UserId equals u.Id
+                         where ur.RoleId == adminRole.Id && ur.UserId == id
+                         select new UsersReadDTO
+                         {
+                             Id = u.Id,
+                             Email = u.Email,
+                             Name = u.Name,
+                             LastName = u.LastName,
+                             DateBirth = u.DateBirth,
+                             ImageUrl = u.ImageUrl
+                         }).FirstOrDefault();
+
+            if (admin == null) return NotFound(new { message = "Administrador no encontrado." });
+
+            return Ok(admin);
         }
 
-        // CAMBIO: cualquier usuario autenticado puede editar por correo
+        // Update por correo, NO por id. El correo NO se puede actualizar.
         [Authorize]
         [HttpPut("email/{email}")]
-        public async Task<IActionResult> UpdateUserByEmail(string email, [FromBody] UsersUpdateDTO updateDto)
+        public async Task<IActionResult> UpdateAdminByEmail(string email, [FromBody] UsersUpdateDTO updateDto)
         {
+            // Ya no se valida que el autenticado sea el mismo, cualquiera puede editar
             var updated = await _userService.UpdateUserByEmailAsync(email, updateDto);
             if (updated == null)
-                return NotFound(new { message = "Usuario no encontrado." });
+                return NotFound(new { message = "Administrador no encontrado." });
 
             return Ok(updated);
         }
 
         [Authorize]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(long id)
+        public async Task<IActionResult> DeleteAdmin(long id)
         {
-            var loggedUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == User.Identity.Name);
-            if (loggedUser == null)
-                return Unauthorized(new { message = "No autenticado." });
-
-            var isAdmin = await _userService.IsAdminAsync(loggedUser.Id);
-            if (!isAdmin)
-                return StatusCode(403, new { message = "Solo un administrador puede eliminar usuarios." });
-
             var userToDelete = await _context.Users.FindAsync(id);
 
             if (userToDelete == null)
-                return NotFound(new { message = "Usuario no encontrado." });
+                return NotFound(new { message = "Administrador no encontrado." });
 
             await _userService.DeleteUserAsync(id);
             return NoContent();

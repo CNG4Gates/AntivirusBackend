@@ -1,4 +1,6 @@
 using Antivirus.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Antivirus.Services
 {
@@ -7,7 +9,7 @@ namespace Antivirus.Services
         Task<IEnumerable<UsersReadDTO>> GetAllUsersAsync();
         Task<UsersReadDTO?> GetUserByIdAsync(long id);
         Task<UsersReadDTO> CreateUserAsync(UsersCreateDTO userDto, bool isAdmin = false);
-        Task<UsersReadDTO?> UpdateUserAsync(long id, UsersCreateDTO userDto);
+        Task<UsersReadDTO?> UpdateUserByEmailAsync(string email, UsersUpdateDTO userDto); // <--- CORRECTO
         Task<bool> DeleteUserAsync(long id);
         Task<bool> IsAdminAsync(long userId);
     }
