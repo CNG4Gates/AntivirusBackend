@@ -3,6 +3,9 @@ using Antivirus.Models;
 using Microsoft.EntityFrameworkCore;
 using Antivirus.Data;
 using Antivirus.config;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Antivirus.Services
 {
@@ -24,7 +27,8 @@ namespace Antivirus.Services
                 Name = u.Name,
                 LastName = u.LastName,
                 Email = u.Email,
-                DateBirth = u.DateBirth
+                DateBirth = u.DateBirth,
+                ImageUrl = u.ImageUrl
             });
         }
 
@@ -38,7 +42,8 @@ namespace Antivirus.Services
                 Name = user.Name,
                 LastName = user.LastName,
                 Email = user.Email,
-                DateBirth = user.DateBirth
+                DateBirth = user.DateBirth,
+                ImageUrl = user.ImageUrl
             };
         }
 
@@ -50,12 +55,12 @@ namespace Antivirus.Services
                 LastName = userDto.LastName,
                 Email = userDto.Email,
                 Password = PasswordHasher.HashPassword(userDto.Password),
-                DateBirth = userDto.DateBirth
+                DateBirth = userDto.DateBirth,
+                ImageUrl = userDto.ImageUrl
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Rol: Usuario (Id=1) o Admin (Id=2)
             var roleId = isAdmin ? 2 : 1;
             var userRole = new UserRole
             {
@@ -71,30 +76,45 @@ namespace Antivirus.Services
                 Name = user.Name,
                 LastName = user.LastName,
                 Email = user.Email,
-                DateBirth = user.DateBirth
+                DateBirth = user.DateBirth,
+                ImageUrl = user.ImageUrl
             };
         }
 
-        public async Task<UsersReadDTO?> UpdateUserAsync(long id, UsersCreateDTO userDto)
+        // NUEVO: UpdateUserByEmailAsync (ya NO permite cambiar email)
+        public async Task<UsersReadDTO?> UpdateUserByEmailAsync(string email, UsersUpdateDTO userDto)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null) return null;
 
-            user.Name = userDto.Name ?? user.Name;
-            user.LastName = userDto.LastName ?? user.LastName;
-            user.DateBirth = userDto.DateBirth ?? user.DateBirth;
+            if (userDto.Name != null)
+                user.Name = userDto.Name;
+
+            if (userDto.LastName != null)
+                user.LastName = userDto.LastName;
+
+            if (userDto.DateBirth != null)
+                user.DateBirth = userDto.DateBirth;
+
+            if (userDto.ImageUrl != null)
+                user.ImageUrl = userDto.ImageUrl;
+
             if (!string.IsNullOrEmpty(userDto.Password))
                 user.Password = PasswordHasher.HashPassword(userDto.Password);
 
+            // No se actualiza el email, simplemente lo ignoramos
+
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
+
             return new UsersReadDTO
             {
                 Id = user.Id,
                 Name = user.Name,
                 LastName = user.LastName,
                 Email = user.Email,
-                DateBirth = user.DateBirth
+                DateBirth = user.DateBirth,
+                ImageUrl = user.ImageUrl
             };
         }
 
