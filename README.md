@@ -1,81 +1,80 @@
-🎓 Bootcamp Platform Backend API
-API Backend para una plataforma educativa construida con .NET 9.0, que administra bootcamps, instituciones, usuarios, oportunidades y beneficios. Esta API permite a las instituciones educativas gestionar programas, estudiantes y recursos de forma segura.
+# 🎓 Bootcamp Platform Backend API - Antivirus para la Deserción
 
-🚀 Live Demo
-Backend API: http://3.142.142.153:5000/
+API Backend para una plataforma educativa (Antivirus para la Deserción) construida con .NET 9.0, que administra bootcamps, instituciones, usuarios, oportunidades y beneficios. Esta API permite a las instituciones educativas gestionar programas, estudiantes y recursos de forma segura.
 
-Swagger UI (API Docs): http://3.142.142.153:5000/swagger
+## 🚀 Live Demo
+**Backend API:** http://3.142.142.153:5000/
 
-🗂️ Tabla de Contenidos
-Características
+**Swagger UI (API Docs):** http://3.142.142.153:5000/swagger
 
-Stack Tecnológico
+## 📋 Tabla de Contenidos
+- [Características](#-características)
+- [Stack Tecnológico](#-stack-tecnológico)
+- [Primeros Pasos](#-primeros-pasos)
+- [Ejemplo de Consumo Frontend](#-ejemplo-de-consumo-frontend)
+- [Autenticación](#-autenticación)
+- [Documentación de la API](#-documentación-de-la-api-swagger)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Equipo de Desarrollo](#-equipo-de-desarrollo)
 
-Primeros Pasos
+## ✨ Características
 
-Ejemplo de Consumo Frontend
+### 🔐 Autenticación y Autorización
+- JWT Authentication (tokens)
+- Control de acceso por roles (User/Admin)
+- Gestión de usuarios, administradores, perfiles, roles
 
-Autenticación
+### 🔧 Características Adicionales
+- CRUD de bootcamps, instituciones, oportunidades, servicios, beneficios
+- Documentación Swagger (OAS 3.0)
+- Permisos CORS habilitados para frontend
+- Base de datos MySQL
 
-Documentación de la API
+## 🛠️ Stack Tecnológico
 
-Estructura del Proyecto
+- **Backend**: .NET 9.0 Web API
+- **ORM**: Entity Framework Core + MySQL
+- **Docs**: Swagger/OpenAPI
+- **Auth**: JWT Bearer Tokens
 
-Notas de Seguridad
+## 🚀 Primeros Pasos
 
-Equipo de Desarrollo
+### Requisitos:
+- .NET 9.0 SDK
+- MySQL
+- Git
 
-✨ Características
-JWT Authentication (tokens)
+### Instalación local
 
-Control de acceso por roles (User/Admin)
+1. **Clonar el repositorio**
+   ```bash
+   git clone <url-repositorio>
+   cd AntivirusBackend/Antivirus
+   ```
 
-Gestión de usuarios, admins, perfiles, roles
+2. **Restaurar dependencias**
+   ```bash
+   dotnet restore
+   ```
 
-CRUD de bootcamps, instituciones, oportunidades, servicios, beneficios
+3. **Actualizar base de datos**
+   ```bash
+   dotnet ef database update
+   ```
 
-Documentación Swagger (OAS 3.0)
+4. **Ejecutar la aplicación**
+   ```bash
+   dotnet run
+   ```
 
-Permisos CORS habilitados para frontend
+5. **Acceder a la API**
+   - API en: http://localhost:5000/
+   - Swagger en: http://localhost:5000/swagger
 
-Base de datos MySQL
+## ⚡ Ejemplo de Consumo Frontend
 
-💻 Stack Tecnológico
-Backend: .NET 9.0 Web API
-
-ORM: Entity Framework Core + MySQL
-
-Docs: Swagger/OpenAPI
-
-Auth: JWT Bearer Tokens
-
-🏁 Primeros Pasos
-Requisitos:
-
-.NET 9.0 SDK
-
-MySQL
-
-Git
-
-Instalación local
-bash
-Copiar
-Editar
-git clone <repository-url>
-cd AntivirusBackend/Antivirus
-dotnet restore
-dotnet ef database update
-dotnet run
-API en: http://localhost:5000/
-
-Swagger en: http://localhost:5000/swagger
-
-⚡ Ejemplo de Consumo Frontend
-1. Registro de usuario
-bash
-Copiar
-Editar
+### 1. Registro de usuario
+```bash
 curl -X POST "http://3.142.142.153:5000/api/users/register" \
   -H "Content-Type: application/json" \
   -d '{
@@ -85,157 +84,153 @@ curl -X POST "http://3.142.142.153:5000/api/users/register" \
     "lastName": "Pérez",
     "dateBirth": "2000-01-01"
   }'
-Nota: Este endpoint es público, no requiere autenticación.
+```
 
-2. Login de usuario
-bash
-Copiar
-Editar
+**Nota:** Este endpoint es público, no requiere autenticación.
+
+### 2. Login de usuario
+```bash
 curl -X POST "http://3.142.142.153:5000/api/users/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "usuario@demo.com",
     "password": "superseguro123"
   }'
-Response:
-Recibirás un JWT token. Guárdalo y úsalo en el header Authorization para endpoints protegidos.
+```
 
-3. Usar JWT para endpoints protegidos
-bash
-Copiar
-Editar
-curl -H "Authorization: Bearer TU_TOKEN_JWT"
+**Response:** Recibirás un JWT token. Guárdalo y úsalo en el header Authorization para endpoints protegidos.
+
+### 3. Usar JWT para endpoints protegidos
+```bash
+curl -H "Authorization: Bearer TU_TOKEN_JWT" \
      http://3.142.142.153:5000/api/bootcamps
-IMPORTANTE:
-Solo los endpoints de registro y login NO requieren autenticación. El resto requiere el header:
+```
 
-makefile
-Copiar
-Editar
+**IMPORTANTE:** Solo los endpoints de registro y login NO requieren autenticación. El resto requiere el header:
+
+```http
 Authorization: Bearer TU_TOKEN_JWT
-🔐 Autenticación
-Registro: /api/users/register y /api/admins/register (sin token)
+```
 
-Login: /api/users/login y /api/admins/login (sin token)
+## 🔐 Autenticación
 
-El resto de endpoints requieren JWT (usuarios o admins)
+### Configuración JWT
+- **Registro** (sin token):
 
-Ejemplo de header para peticiones autenticadas:
+  * `/api/users/register`
+  * `/api/admins/register`
 
-http
-Copiar
-Editar
+- **Login** (sin token): 
+
+  * `/api/users/login`
+  * `/api/admins/login`
+
+- **El resto de endpoints** requieren JWT (usuarios o admins)
+
+### Ejemplo de header para peticiones autenticadas:
+```http
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...
-📚 Documentación de la API (Swagger)
+```
+
+## 📚 Documentación de la API (Swagger)
+
 API docs completas en http://3.142.142.153:5000/swagger
 
-🔥 Resumen y ejemplos de endpoints principales
+### 🔥 Resumen y ejemplos de endpoints principales
+
 ### Usuarios
-POST /api/users/register
-Descripción: Crea un usuario normal (público)
-
-POST /api/users/login
-Descripción: Login de usuario (público)
-
-POST /api/users/logout
-Descripción: Logout (requiere token)
-
-GET /api/users
-Descripción: Listar usuarios (requiere token)
-
-GET /api/users/{id}
-Descripción: Traer usuario por ID (requiere token)
-
-PUT /api/users/email/{email}
-Descripción: Actualizar datos por email (requiere token)
-
-DELETE /api/users/{id}
-Descripción: Eliminar usuario (requiere token)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/users/register` | Crea un usuario normal (público) |
+| POST | `/api/users/login` | Login de usuario (público) |
+| POST | `/api/users/logout` | Logout (requiere token) |
+| GET | `/api/users` | Listar usuarios (requiere token) |
+| GET | `/api/users/{id}` | Traer usuario por ID (requiere token) |
+| PUT | `/api/users/email/{email}` | Actualizar datos por email (requiere token) |
+| DELETE | `/api/users/{id}` | Eliminar usuario (requiere token) |
 
 ### Admins
-POST /api/admins/register
-Descripción: Crea un usuario admin (público)
-
-POST /api/admins/login
-Descripción: Login de admin (público)
-
-POST /api/admins/logout
-Descripción: Logout (requiere token)
-
-GET /api/admins
-Descripción: Listar admins (requiere token)
-
-GET /api/admins/{id}
-Descripción: Traer admin por ID (requiere token)
-
-PUT /api/admins/email/{email}
-Descripción: Actualizar admin por email (requiere token)
-
-DELETE /api/admins/{id}
-Descripción: Eliminar admin (requiere token)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/admins/register` | Crea un usuario admin (público) |
+| POST | `/api/admins/login` | Login de admin (público) |
+| POST | `/api/admins/logout` | Logout (requiere token) |
+| GET | `/api/admins` | Listar admins (requiere token) |
+| GET | `/api/admins/{id}` | Traer admin por ID (requiere token) |
+| PUT | `/api/admins/email/{email}` | Actualizar admin por email (requiere token) |
+| DELETE | `/api/admins/{id}` | Eliminar admin (requiere token) |
 
 ### Bootcamps
-GET /api/Bootcamp
-Descripción: Lista bootcamps
-Auth: Sí
-
-POST /api/Bootcamp
-Descripción: Crear bootcamp
-Auth: Sí
-
-GET /api/Bootcamp/{id}
-Descripción: Bootcamp por ID
-Auth: Sí
-
-PUT /api/Bootcamp/{id}
-Descripción: Actualizar
-Auth: Sí
-
-DELETE /api/Bootcamp/{id}
-Descripción: Eliminar
-Auth: Sí
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/Bootcamp` | Lista bootcamps | Sí |
+| POST | `/api/Bootcamp` | Crear bootcamp | Sí |
+| GET | `/api/Bootcamp/{id}` | Bootcamp por ID | Sí |
+| PUT | `/api/Bootcamp/{id}` | Actualizar | Sí |
+| DELETE | `/api/Bootcamp/{id}` | Eliminar | Sí |
 
 ### Instituciones
-GET /api/Institutions
-
-POST /api/Institutions
-
-GET /api/Institutions/{id}
-
-PUT /api/Institutions/{id}
-
-DELETE /api/Institutions/{id}
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/Institutions` | Lista instituciones |
+| POST | `/api/Institutions` | Crear institución |
+| GET | `/api/Institutions/{id}` | Institución por ID |
+| PUT | `/api/Institutions/{id}` | Actualizar institución |
+| DELETE | `/api/Institutions/{id}` | Eliminar institución |
 
 ### Oportunidades
-GET /api/Opportunities
-
-POST /api/Opportunities
-
-GET /api/Opportunities/{id}
-
-PUT /api/Opportunities/{id}
-
-DELETE /api/Opportunities/{id}
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/Opportunities` | Lista oportunidades |
+| POST | `/api/Opportunities` | Crear oportunidad |
+| GET | `/api/Opportunities/{id}` | Oportunidad por ID |
+| PUT | `/api/Opportunities/{id}` | Actualizar oportunidad |
+| DELETE | `/api/Opportunities/{id}` | Eliminar oportunidad |
 
 ### Beneficios
-GET /api/Benefits
-
-POST /api/Benefits
-
-GET /api/Benefits/{id}
-
-PUT /api/Benefits/{id}
-
-DELETE /api/Benefits/{id}
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/Benefits` | Lista beneficios |
+| POST | `/api/Benefits` | Crear beneficio |
+| GET | `/api/Benefits/{id}` | Beneficio por ID |
+| PUT | `/api/Benefits/{id}` | Actualizar beneficio |
+| DELETE | `/api/Benefits/{id}` | Eliminar beneficio |
 
 ### Servicios
-GET /api/Services
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/Services` | Lista servicios |
+| POST | `/api/Services` | Crear servicio |
+| GET | `/api/Services/{id}` | Servicio por ID |
+| PUT | `/api/Services/{id}` | Actualizar servicio |
+| DELETE | `/api/Services/{id}` | Eliminar servicio |
 
-POST /api/Services
+## 📝 Estructura del Proyecto
 
-GET /api/Services/{id}
+```
+AntivirusBackend/
+├── Antivirus/
+│   ├── Controllers/        # Controladores API
+│   ├── Services/           # Servicios - Lógica de Negocio
+│   ├── Models/             # Entidades DB
+│   ├── Dtos/               # Data Transfer Objects
+│   ├── Interfaces/         # Interfaces de Servicio
+│   ├── Data/               # Contexto DB
+│   ├── config/             # Configuración
+│   ├── Migrations/         # EF Core Migrations
+│   └── Program.cs          # Entry Point de la app
+├── README.md
+└── Antivirus.sln
+```
 
-PUT /api/Services/{id}
+## 👥 Equipo de Desarrollo
 
-DELETE /api/Services/{id}
+
+* [Anthony Muñoz](https://github.com/AnthonyCarmine)
+* [María Camila Botero](https://github.com/mcamilabotero3)
+* [María Alejandra Infante](https://github.com/MarialeInf)
+* [Santiago Martínez](https://github.com/SantiagoMartinez22)
+* [Esteban Montoya](https://github.com/emontoyab)
+* [María Melisa Serna](https://github.com/Pantone7427)
+* [Geny Marcela Vargas](https://github.com/genyvarsua)
 
